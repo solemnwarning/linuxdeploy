@@ -32,9 +32,9 @@ namespace bf = boost::filesystem;
 
 namespace {
     // equivalent to 0644
-    constexpr bf::perms DEFAULT_PERMS = bf::owner_write | bf::owner_read | bf::group_read | bf::others_read;
+    static const bf::perms DEFAULT_PERMS = bf::owner_write | bf::owner_read | bf::group_read | bf::others_read;
     // equivalent to 0755
-    constexpr bf::perms EXECUTABLE_PERMS = DEFAULT_PERMS | bf::owner_exe | bf::group_exe | bf::others_exe;
+    static const bf::perms EXECUTABLE_PERMS = DEFAULT_PERMS | bf::owner_exe | bf::group_exe | bf::others_exe;
 
     class CopyOperation {
     public:
