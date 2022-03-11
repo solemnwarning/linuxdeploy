@@ -25,4 +25,6 @@ namespace linuxdeploy {
      * @return
      */
     bool addDefaultKeys(desktopfile::DesktopFile& desktopFile, const std::string& executableFileName);
+
+    void doCopyFile(const boost::filesystem::path &from, const boost::filesystem::path &to);
 }

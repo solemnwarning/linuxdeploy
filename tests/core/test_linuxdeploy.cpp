@@ -4,6 +4,7 @@
 
 using namespace std;
 using namespace linuxdeploy::core;
+using namespace linuxdeploy;
 namespace bf = boost::filesystem;
 
 namespace LinuxDeployTest {
@@ -59,23 +60,23 @@ namespace LinuxDeployTest {
 
         bf::path add_executable() const {
             create_directories(target_executable_path.parent_path());
-            copy_file(source_executable_path, target_executable_path);
+            doCopyFile(source_executable_path, target_executable_path);
 
             return target_executable_path;
         }
 
         void add_desktop() const {
             create_directories(target_desktop_path.parent_path());
-            copy_file(source_desktop_path, target_desktop_path);
+            doCopyFile(source_desktop_path, target_desktop_path);
         }
 
         void add_icon() const {
             create_directories(target_icon_path.parent_path());
-            copy_file(source_icon_path, target_icon_path);
+            doCopyFile(source_icon_path, target_icon_path);
         }
 
         void add_apprun() const {
-            copy_file(source_apprun_path, target_apprun_path);
+            doCopyFile(source_apprun_path, target_apprun_path);
         }
     };
 

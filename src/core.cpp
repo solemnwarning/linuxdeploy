@@ -1,5 +1,10 @@
-#include <iostream>
 #include <boost/filesystem/path.hpp>
+#include <errno.h>
+#include <fcntl.h>
+#include <iostream>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <linuxdeploy/core/appdir.h>
 #include <linuxdeploy/core/log.h>
@@ -10,6 +15,7 @@ using namespace linuxdeploy::core;
 using namespace linuxdeploy::core::log;
 using namespace linuxdeploy::desktopfile;
 namespace bf = boost::filesystem;
+namespace bs = boost::system;
 
 namespace linuxdeploy {
     class DeployError : public std::runtime_error {
@@ -114,5 +120,85 @@ namespace linuxdeploy {
         setDefault("Desktop Entry", "Categories", "Utility;");
 
         return rv;
+    }
+
+    void doCopyFile(const bf::path &from, const bf::path &to)
+    {
+        bool ok = true;
+        const bf::path *err_path;
+        int err_num;
+
+        int from_fd = open(from.c_str(), O_RDONLY);
+        if(from_fd < 0)
+        {
+            err_num = errno;
+            err_path = &from;
+            ok = false;
+        }
+
+        int to_fd = open(to.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0777);
+        if(to_fd < 0)
+        {
+            err_num = errno;
+            err_path = &to;
+            ok = false;
+        }
+
+        while(ok)
+        {
+            char buf[1024];
+            ssize_t read_bytes = read(from_fd, buf, sizeof(buf));
+
+            if(read_bytes < 0)
+            {
+                err_num = errno;
+                err_path = &from;
+                ok = false;
+            }
+            else if(read_bytes == 0)
+            {
+                /* EOF */
+                break;
+            }
+
+            for(ssize_t pos = 0; pos < read_bytes;)
+            {
+                ssize_t wrote_bytes = write(to_fd, buf + pos, read_bytes - pos);
+
+                if(wrote_bytes < 0)
+                {
+                    err_num = errno;
+                    err_path = &to;
+                    ok = false;
+
+                    break;
+                }
+
+                pos += wrote_bytes;
+            }
+        }
+
+        if(to_fd >= 0 && close(to_fd) != 0 && ok)
+        {
+            err_num = errno;
+            err_path = &to;
+            ok = false;
+        }
+
+        if(from_fd >= 0)
+        {
+            close(from_fd);
+        }
+
+        if(!ok)
+        {
+            /* Delete incomplete output file. */
+            if(to_fd >= 0)
+            {
+                unlink(to.c_str());
+            }
+
+            throw bf::filesystem_error("doCopyFile", *err_path, bs::error_code(err_num, bs::system_category()));
+        }
     }
 }

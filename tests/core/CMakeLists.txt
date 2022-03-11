@@ -28,7 +28,7 @@ function(ld_core_add_test_executable NAME)
     )
 endfunction()
 
-ld_core_add_test_executable(test_appdir test_appdir.cpp)
+ld_core_add_test_executable(test_appdir test_appdir.cpp ../../src/core.cpp)
 # register in CTest
 ld_add_test(test_appdir)
 

@@ -17,7 +17,8 @@
 #include "linuxdeploy/desktopfile/desktopfileentry.h"
 #include "linuxdeploy/util/util.h"
 #include "linuxdeploy/subprocess/subprocess.h"
-#include "copyright.h"
+#include "copyright/copyright.h"
+#include "../core.h"
 
 // auto-generated headers
 #include "excludelist.h"
@@ -163,7 +164,7 @@ namespace linuxdeploy {
                                 return true;
                             }
 
-                            bf::copy_file(from, to, bf::copy_option::overwrite_if_exists);
+                            doCopyFile(from, to);
                             bf::permissions(to, addedPerms | bf::add_perms);
                         } catch (const bf::filesystem_error& e) {
                             ldLog() << LD_ERROR << "Failed to copy file" << from << "to" << to << LD_NO_SPACE << ":" << e.what() << std::endl;
