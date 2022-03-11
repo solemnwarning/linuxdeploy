@@ -12,7 +12,7 @@ jobs:
   build-and-test:
     strategy:
       matrix:
-        ARCH: [x86_64, i386]
+        ARCH: [x86_64, i386, armhf, aarch64]
         BUILD_TYPE: [appimage, coverage]
       fail-fast: false
 
@@ -41,13 +41,34 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcovr libmagic-dev:i386 libjpeg-dev:i386 libpng-dev:i386 libboost-filesystem-dev:i386 libboost-regex-dev:i386 cimg-dev gcc-multilib g++-multilib libfuse2:i386
 
+      - name: Prepare chroot (armhf)
+        if: matrix.ARCH == 'armhf' && matrix.BUILD_TYPE != 'coverage'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static binfmt-support debootstrap
+          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=armhf bionic ./bionic-armhf-chroot/ http://ports.ubuntu.com/
+
+      - name: Prepare chroot (aarch64)
+        if: matrix.ARCH == 'aarch64' && matrix.BUILD_TYPE != 'coverage'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static binfmt-support debootstrap
+          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=arm64 bionic ./bionic-aarch64-chroot/ http://ports.ubuntu.com/
+
       - name: Test coverage
         run: bash -ex ci/test-coverage.sh
-        if: matrix.BUILD_TYPE == 'coverage'
+        if: matrix.BUILD_TYPE == 'coverage' && (matrix.ARCH == 'i386' || matrix.ARCH == 'x86_64')
 
       - name: Build, test and build AppImage
         run: bash -ex ci/build.sh
-        if: matrix.BUILD_TYPE != 'coverage'
+        if: matrix.BUILD_TYPE != 'coverage' && (matrix.ARCH == 'i386' || matrix.ARCH == 'x86_64')
+
+      - name: Build, test and build AppImage
+        run: |
+          sudo mkdir -p "./bionic-$ARCH-chroot/$(pwd)"
+          sudo mount -o bind ./ "./bionic-$ARCH-chroot/$(pwd)"
+          sudo chroot ./bionic-$ARCH-chroot/ sh -c 'cd $1 && ARCH="$2" ./ci/build.sh' -- "$(pwd)" "$ARCH"
+        if: matrix.BUILD_TYPE != 'coverage' && (matrix.ARCH == 'armhf' || matrix.ARCH == 'aarch64')
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
