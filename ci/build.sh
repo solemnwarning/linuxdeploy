@@ -39,26 +39,23 @@ else
     exit 1
 fi
 
-# fetch up-to-date CMake
-mkdir cmake-prefix
-
-if [ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]
+# Check if installed CMake is new enough (>= 3.14)
+if ! cmake --version | perl -ne 'exit !(/(\d+)\.(\d+)/ && $1 >= 3 && ($1 > 3 || $2 >= 14))'
 then
-	wget https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1.tar.gz
-	tar -xf cmake-3.18.1.tar.gz
-	
-	CMAKE_PREFIX="$(pwd)/cmake-prefix"
-	
-	cd cmake-3.18.1
-	./bootstrap --prefix="$CMAKE_PREFIX" --parallel=$(nproc)
-	make -j$(nproc)
-	make install
-	cd ..
-	
-	export PATH="$CMAKE_PREFIX/bin:$PATH"
-else
-	wget -O- https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1-Linux-x86_64.tar.gz | tar -xz -C cmake-prefix --strip-components=1
-	export PATH="$(readlink -f cmake-prefix/bin):$PATH"
+	# fetch up-to-date CMake
+	mkdir cmake-prefix
+
+	if [ "$ARCH" = "armhf" ] || [ "$ARCH" = "aarch64" ]
+	then
+		pushd "$REPO_ROOT"
+		./ci/build-cmake.sh "$BUILD_DIR/cmake-prefix" "/"
+		popd
+		
+		export PATH="$BUILD_DIR/cmake-prefix/bin:$PATH"
+	else
+		wget -O- https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1-Linux-x86_64.tar.gz | tar -xz -C cmake-prefix --strip-components=1
+		export PATH="$(readlink -f cmake-prefix/bin):$PATH"
+	fi
 fi
 
 cmake --version

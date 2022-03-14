@@ -46,14 +46,42 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support debootstrap
-          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=armhf bionic ./bionic-armhf-chroot/ http://ports.ubuntu.com/
+          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=armhf focal ./focal-armhf-chroot/ http://ports.ubuntu.com/
+
+          # Install updates not present in base 'focal' repo.
+          sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
+          sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-security main universe" > /dev/null
+          sudo chroot ./focal-armhf-chroot/ apt-get -y update
+          sudo chroot ./focal-armhf-chroot/ apt-get -y dist-upgrade
+          sudo chroot ./focal-armhf-chroot/ apt-get -y autoremove
 
       - name: Prepare chroot (aarch64)
         if: matrix.ARCH == 'aarch64' && matrix.BUILD_TYPE != 'coverage'
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support debootstrap
-          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=arm64 bionic ./bionic-aarch64-chroot/ http://ports.ubuntu.com/
+          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=arm64 focal ./focal-aarch64-chroot/ http://ports.ubuntu.com/
+
+          # Install updates not present in base 'focal' repo.
+          sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
+          sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-security main universe" > /dev/null
+          sudo chroot ./focal-aarch64-chroot/ apt-get -y update
+          sudo chroot ./focal-aarch64-chroot/ apt-get -y dist-upgrade
+          sudo chroot ./focal-aarch64-chroot/ apt-get -y autoremove
+
+      - name: Build CMake (armhf)
+        if: matrix.ARCH == 'armhf' && matrix.BUILD_TYPE != 'coverage'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-armhf
+          sudo sh -c 'ARCH=armhf ./ci/build-cmake.sh "$1" "$2"' -- "/usr/local/" "$(pwd)/focal-armhf-chroot/"
+
+      - name: Build CMake (aarch64)
+        if: matrix.ARCH == 'aarch64' && matrix.BUILD_TYPE != 'coverage'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-arm64
+          sudo sh -c 'ARCH=aarch64 ./ci/build-cmake.sh "$1" "$2"' -- "/usr/local/" "$(pwd)/focal-aarch64-chroot/"
 
       - name: Test coverage
         run: bash -ex ci/test-coverage.sh
@@ -65,9 +93,9 @@ jobs:
 
       - name: Build, test and build AppImage
         run: |
-          sudo mkdir -p "./bionic-$ARCH-chroot/$(pwd)"
-          sudo mount -o bind ./ "./bionic-$ARCH-chroot/$(pwd)"
-          sudo chroot ./bionic-$ARCH-chroot/ sh -c 'cd $1 && ARCH="$2" ./ci/build.sh' -- "$(pwd)" "$ARCH"
+          sudo mkdir -p "./focal-$ARCH-chroot/$(pwd)"
+          sudo mount -o bind ./ "./focal-$ARCH-chroot/$(pwd)"
+          sudo chroot ./focal-$ARCH-chroot/ sh -c 'cd $1 && ARCH="$2" ./ci/build.sh' -- "$(pwd)" "$ARCH"
         if: matrix.BUILD_TYPE != 'coverage' && (matrix.ARCH == 'armhf' || matrix.ARCH == 'aarch64')
 
       - name: Archive artifacts
