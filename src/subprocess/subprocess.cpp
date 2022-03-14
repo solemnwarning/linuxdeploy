@@ -6,6 +6,7 @@
 #include <utility>
 #include <unistd.h>
 #include <thread>
+#include <stdio.h>
 
 // local headers
 #include "linuxdeploy/subprocess/subprocess.h"
@@ -82,6 +83,7 @@ namespace linuxdeploy {
             const auto result = run();
 
             if (result.exit_code() != 0) {
+                fprintf(stderr, ">>> subprocess failed (exit code %d)\n", result.exit_code());
                 throw std::logic_error{"subprocess failed (exit code " + std::to_string(result.exit_code()) + ")"};
             }
 
