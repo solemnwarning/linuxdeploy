@@ -46,7 +46,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support debootstrap
-          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=armhf focal ./focal-armhf-chroot/ http://ports.ubuntu.com/
+          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf,pkg-config --arch=armhf focal ./focal-armhf-chroot/ http://ports.ubuntu.com/
 
           # Install updates not present in base 'focal' repo.
           sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
@@ -60,7 +60,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support debootstrap
-          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf --arch=arm64 focal ./focal-aarch64-chroot/ http://ports.ubuntu.com/
+          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf,pkg-config --arch=arm64 focal ./focal-aarch64-chroot/ http://ports.ubuntu.com/
 
           # Install updates not present in base 'focal' repo.
           sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
