@@ -9,6 +9,7 @@
 # Changed to use C++ standard library containers instead of Qt ones.
 
 set -e
+set -x
 
 filename=excludelist.h
 
