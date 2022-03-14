@@ -3,10 +3,10 @@
 set -e
 set -x
 
-CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1.tar.gz"
-CMAKE_SHA256="c0e3338bd37e67155b9d1e9526fec326b5c541f74857771b7ffed0c46ad62508"
+CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.19.8/cmake-3.19.8.tar.gz"
+CMAKE_SHA256="09b4fa4837aae55c75fb170f6a6e2b44818deba48335d1969deddfbb34e30369"
 CMAKE_TAR="$(basename "$CMAKE_URL")"
-CMAKE_DIR=cmake-3.18.1
+CMAKE_DIR=cmake-3.19.8
 
 INSTALL_PREFIX="$1"
 INSTALL_DESTDIR="$2"
