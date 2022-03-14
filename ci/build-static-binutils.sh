@@ -10,13 +10,21 @@ if [[ "$INSTALL_DESTDIR" == "" ]]; then
     exit 1
 fi
 
+CONFIGURE_HOST=
+
 # support cross-compilation for 32-bit ISAs
 case "$ARCH" in
-    "x86_64"|"amd64"|"armhf"|"aarch64")
+    "x86_64"|"amd64")
         ;;
     "i386"|"i586"|"i686")
         export CFLAGS="-m32"
         export CXXFLAGS="-m32"
+        ;;
+    "armhf")
+        CONFIGURE_HOST="arm-linux-gnueabihf"
+        ;;
+    "aarch64")
+        CONFIGURE_HOST="aarch64-linux-gnu"
         ;;
     *)
         echo "Error: unsupported architecture: $ARCH"
@@ -48,7 +56,7 @@ wget https://ftp.gnu.org/gnu/binutils/binutils-2.35.tar.xz -O- | tar xJ --strip-
 
 # configure static build
 # inspired by https://github.com/andrew-d/static-binaries/blob/master/binutils/build.sh
-./configure --prefix=/usr --disable-nls --enable-static-link --disable-shared-plugins --disable-dynamicplugin --disable-tls --disable-pie
+./configure --prefix=/usr --disable-nls --enable-static-link --disable-shared-plugins --disable-dynamicplugin --disable-tls --disable-pie $CONFIGURE_HOST
 
 # citing the script linked above: "This strange dance is required to get things to be statically linked."
 make -j "$(nproc)"

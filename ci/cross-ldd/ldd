@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if [ "$#" -ne "1" ]
+then
+    echo "Usage: $0 <filename>" 1>&2
+    exit 64 # EX_USAGE
+fi
+
+case "$ARCH" in
+    "armhf")
+        LD_SO=/lib/ld-linux-armhf.so.*
+        ;;
+    "aarch64")
+        LD_SO=/lib/ld-linux-aarch64.so.*
+        ;;
+    *)
+        echo "Error: unsupported architecture: $ARCH"
+        exit 1
+        ;;
+esac
+
+if [ -x $LD_SO ]
+then
+    $LD_SO --list "$1"
+    exit $?
+else
+    echo "Couldn't find correct ld-linux.so ($LD_SO)" 1>&2
+    exit 72 # EX_OSFILE
+fi

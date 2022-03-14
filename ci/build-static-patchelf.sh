@@ -10,13 +10,21 @@ if [[ "$INSTALL_DESTDIR" == "" ]]; then
     exit 1
 fi
 
+CONFIGURE_HOST=
+
 # support cross-compilation for 32-bit ISAs
 case "$ARCH" in
-    "x86_64"|"amd64"|"armhf"|"aarch64")
+    "x86_64"|"amd64")
         ;;
     "i386"|"i586"|"i686")
         export CFLAGS="-m32"
         export CXXFLAGS="-m32"
+        ;;
+    "armhf")
+        CONFIGURE_HOST="arm-linux-gnueabihf"
+        ;;
+    "aarch64")
+        CONFIGURE_HOST="aarch64-linux-gnu"
         ;;
     *)
         echo "Error: unsupported architecture: $ARCH"
@@ -53,7 +61,7 @@ git checkout 0.8
 ./bootstrap.sh
 
 # configure static build
-env LDFLAGS="-static -static-libgcc -static-libstdc++" ./configure --prefix=/usr
+env LDFLAGS="-static -static-libgcc -static-libstdc++" ./configure --prefix=/usr $CONFIGURE_HOST
 
 # build binary
 make -j "$(nproc)"

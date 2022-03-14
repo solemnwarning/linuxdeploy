@@ -44,44 +44,60 @@ jobs:
       - name: Prepare chroot (armhf)
         if: matrix.ARCH == 'armhf' && matrix.BUILD_TYPE != 'coverage'
         run: |
+          # sudo apt-get update
+          # sudo apt-get install -y qemu-user-static binfmt-support debootstrap
+          # sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf,pkg-config --arch=armhf focal ./focal-armhf-chroot/ http://ports.ubuntu.com/
+
+          sudo dpkg --add-architecture armhf
+          sudo sed -i /etc/apt/sources.list -e 's/^deb /deb [arch=amd64,i386] /g'
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ $(lsb_release -cs)           main restricted universe multiverse" > /dev/null
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ $(lsb_release -cs)-backports main restricted universe multiverse" > /dev/null
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ $(lsb_release -cs)-updates   main restricted universe multiverse" > /dev/null
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ $(lsb_release -cs)-security  main restricted universe multiverse" > /dev/null
           sudo apt-get update
-          sudo apt-get install -y qemu-user-static binfmt-support debootstrap
-          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf,pkg-config --arch=armhf focal ./focal-armhf-chroot/ http://ports.ubuntu.com/
+
+          # sudo apt-get install -y qemu-user binfmt-support crossbuild-essential-armhf libc6:armhf libc6-dev:armhf
+          # sudo apt-get install -y libmagic-dev:armhf libjpeg-dev:armhf libpng-dev:armhf libboost-filesystem-dev:armhf libboost-regex-dev:armhf libfuse2:armhf
+          sudo apt-get install -y libpcre2-8-0:armhf
+          sudo apt-get install -y libselinux1:armhf
+          sudo apt-get install -y libmount1:armhf
+          sudo apt-get install -y libglib2.0-0:armhf
 
           # Install updates not present in base 'focal' repo.
-          sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
-          sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-security main universe" > /dev/null
-          sudo chroot ./focal-armhf-chroot/ apt-get -y update
-          sudo chroot ./focal-armhf-chroot/ apt-get -y dist-upgrade
-          sudo chroot ./focal-armhf-chroot/ apt-get -y autoremove
+          # sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
+          # sudo tee -a ./focal-armhf-chroot/etc/apt/sources.list <<< "deb [arch=armhf] http://ports.ubuntu.com/ focal-security main universe" > /dev/null
+          # sudo chroot ./focal-armhf-chroot/ apt-get -y update
+          # sudo chroot ./focal-armhf-chroot/ apt-get -y dist-upgrade
+          # sudo chroot ./focal-armhf-chroot/ apt-get -y autoremove
 
       - name: Prepare chroot (aarch64)
         if: matrix.ARCH == 'aarch64' && matrix.BUILD_TYPE != 'coverage'
         run: |
+          # sudo apt-get update
+          # sudo apt-get install -y qemu-user-static binfmt-support debootstrap
+          # sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf,pkg-config --arch=arm64 focal ./focal-aarch64-chroot/ http://ports.ubuntu.com/
+
+          sudo dpkg --add-architecture arm64
+          sudo sed -i /etc/apt/sources.list -e 's/^deb /deb [arch=amd64,i386] /g'
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ $(lsb_release -cs)           main restricted universe multiverse" > /dev/null
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ $(lsb_release -cs)-backports main restricted universe multiverse" > /dev/null
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ $(lsb_release -cs)-updates   main restricted universe multiverse" > /dev/null
+          sudo tee -a /etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ $(lsb_release -cs)-security  main restricted universe multiverse" > /dev/null
           sudo apt-get update
-          sudo apt-get install -y qemu-user-static binfmt-support debootstrap
-          sudo debootstrap --components=main,universe --include=build-essential,libmagic-dev,libjpeg-dev,libpng-dev,libboost-filesystem-dev,libboost-regex-dev,libfuse2,wget,git,libssl-dev,autoconf,automake,patchelf,pkg-config --arch=arm64 focal ./focal-aarch64-chroot/ http://ports.ubuntu.com/
+
+          sudo apt-get install -y qemu-user crossbuild-essential-armhf libc6:armhf libc6-dev:armhf libstdc++-5-dev:armhf zlib1g:armhf libfuse2:armhf libglib2.0-0:armhf
+
+          sudo apt-get install -y qemu-user binfmt-support crossbuild-essential-arm64 libc6:arm64 libc6-dev:arm64
+          sudo apt-get install -y libmagic-dev:arm64 libjpeg-dev:arm64 libpng-dev:arm64 libboost-filesystem-dev:arm64 libboost-regex-dev:arm64 libfuse2:arm64
+          sudo apt-get install -y libmount1:arm64 libselinux1:arm64 libpcre2-8-0:arm64
+          sudo apt-get install -y libglib2.0-0:arm64
 
           # Install updates not present in base 'focal' repo.
-          sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
-          sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-security main universe" > /dev/null
-          sudo chroot ./focal-aarch64-chroot/ apt-get -y update
-          sudo chroot ./focal-aarch64-chroot/ apt-get -y dist-upgrade
-          sudo chroot ./focal-aarch64-chroot/ apt-get -y autoremove
-
-      - name: Build CMake (armhf)
-        if: matrix.ARCH == 'armhf' && matrix.BUILD_TYPE != 'coverage'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y crossbuild-essential-armhf
-          sudo sh -c 'ARCH=armhf ./ci/build-cmake.sh "$1" "$2"' -- "/usr/local/" "$(pwd)/focal-armhf-chroot/"
-
-      - name: Build CMake (aarch64)
-        if: matrix.ARCH == 'aarch64' && matrix.BUILD_TYPE != 'coverage'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y crossbuild-essential-arm64
-          sudo sh -c 'ARCH=aarch64 ./ci/build-cmake.sh "$1" "$2"' -- "/usr/local/" "$(pwd)/focal-aarch64-chroot/"
+          # sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-updates  main universe" > /dev/null
+          # sudo tee -a ./focal-aarch64-chroot/etc/apt/sources.list <<< "deb [arch=arm64] http://ports.ubuntu.com/ focal-security main universe" > /dev/null
+          # sudo chroot ./focal-aarch64-chroot/ apt-get -y update
+          # sudo chroot ./focal-aarch64-chroot/ apt-get -y dist-upgrade
+          # sudo chroot ./focal-aarch64-chroot/ apt-get -y autoremove
 
       - name: Test coverage
         run: bash -ex ci/test-coverage.sh
@@ -93,9 +109,10 @@ jobs:
 
       - name: Build, test and build AppImage
         run: |
-          sudo mkdir -p "./focal-$ARCH-chroot/$(pwd)"
-          sudo mount -o bind ./ "./focal-$ARCH-chroot/$(pwd)"
-          sudo chroot ./focal-$ARCH-chroot/ sh -c 'cd $1 && ARCH="$2" ./ci/build.sh' -- "$(pwd)" "$ARCH"
+          # sudo mkdir -p "./focal-$ARCH-chroot/$(pwd)"
+          # sudo mount -o bind ./ "./focal-$ARCH-chroot/$(pwd)"
+          # sudo chroot ./focal-$ARCH-chroot/ sh -c 'cd $1 && ARCH="$2" ./ci/build.sh' -- "$(pwd)" "$ARCH"
+          ./ci/build.sh
         if: matrix.BUILD_TYPE != 'coverage' && (matrix.ARCH == 'armhf' || matrix.ARCH == 'aarch64')
 
       - name: Archive artifacts
