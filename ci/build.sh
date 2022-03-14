@@ -118,7 +118,7 @@ $QEMU AppDir/usr/bin/linuxdeploy-plugin-appimage --appdir AppDir/
 mv "$OUTPUT" test.AppImage
 
 # verify that the resulting AppImage works
-$QEMU ./test.AppImage "${LINUXDEPLOY_ARGS[@]}"
+QEMU_STRACE=1 $QEMU ./test.AppImage "${LINUXDEPLOY_ARGS[@]}"
 
 # check whether AppImage plugin is found and works
 $QEMU ./test.AppImage "${LINUXDEPLOY_ARGS[@]}" --output appimage
