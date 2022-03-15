@@ -6,7 +6,7 @@ set(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
 set(CMAKE_OBJCOPY      arm-linux-gnueabihf-objcopy)
 
 set(CMAKE_C_FLAGS   "-pthread" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "-pthread" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "-pthread -fexceptions" CACHE STRING "" FORCE)
 
 # where is the target environment located
 #set(CMAKE_FIND_ROOT_PATH  /usr/arm-linux-gnueabihf/)
