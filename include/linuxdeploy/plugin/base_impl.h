@@ -56,7 +56,7 @@ namespace linuxdeploy {
 
                             const subprocess::subprocess proc({pluginPath.string(), arg});
                             stdoutOutput = proc.check_output();
-                        } catch (const std::exception &e) {
+                        } catch (const std::logic_error &e) {
                             ldLog() << LD_WARNING << pluginPath << ": " <<  e.what() << std::endl;
                             return -1;
                         }
