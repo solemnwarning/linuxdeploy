@@ -40,7 +40,8 @@ elif [ "$ARCH" == "armhf" ]; then
     export PATH="$REPO_ROOT/ci/cross-ldd:$PATH"
 elif [ "$ARCH" == "aarch64" ]; then
     EXTRA_CMAKE_ARGS=("-DCMAKE_TOOLCHAIN_FILE=$REPO_ROOT/cmake/toolchains/aarch64-linux-gnu-cross.cmake")
-    QEMU=aarch64
+    QEMU=qemu-aarch64
+    export PATH="$REPO_ROOT/ci/cross-ldd:$PATH"
 else
     echo "Architecture not supported: $ARCH" 1>&2
     exit 1

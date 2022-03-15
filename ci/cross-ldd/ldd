@@ -9,9 +9,11 @@ fi
 case "$ARCH" in
     "armhf")
         LD_SO=/lib/ld-linux-armhf.so.*
+        QEMU=qemu-arm
         ;;
     "aarch64")
         LD_SO=/lib/ld-linux-aarch64.so.*
+        QEMU=qemu-aarch64
         ;;
     *)
         echo "Error: unsupported architecture: $ARCH"
@@ -21,7 +23,7 @@ esac
 
 if [ -x $LD_SO ]
 then
-    $LD_SO --list "$1"
+    $QEMU $LD_SO --list "$1"
     exit $?
 else
     echo "Couldn't find correct ld-linux.so ($LD_SO)" 1>&2
