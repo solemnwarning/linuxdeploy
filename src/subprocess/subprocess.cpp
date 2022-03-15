@@ -82,6 +82,7 @@ namespace linuxdeploy {
             const auto result = run();
 
             if (result.exit_code() != 0) {
+                fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
                 throw std::logic_error{"subprocess failed (exit code " + std::to_string(result.exit_code()) + ")"};
             }
 
