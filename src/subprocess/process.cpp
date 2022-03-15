@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <memory.h>
 #include <wait.h>
+#include <stdio.h>
+
 
 // local headers
 #include "linuxdeploy/subprocess/process.h"
@@ -47,6 +49,7 @@ process::process(const std::vector<std::string>& args, const subprocess_env_map_
 
         if (rv != 0) {
             const auto error = errno;
+            fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
             throw std::logic_error("failed to create pipe: " + std::string(strerror(error)));
         }
     };
@@ -74,6 +77,7 @@ process::process(const std::vector<std::string>& args, const subprocess_env_map_
                 if (dup2(fd, fileno) == -1) {
                     const auto error = errno;
                     if (error != EINTR) {
+                    fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
                         throw std::logic_error{"failed to connect pipes: " + std::string(strerror(error))};
                     }
                     continue;
@@ -135,6 +139,7 @@ int process::close() {
             int status;
 
             if (waitpid(child_pid_, &status, 0) == -1) {
+            fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
                 throw std::logic_error{"waitpid() failed"};
             }
 
@@ -210,10 +215,12 @@ std::vector<char*> process::make_env_vector_(const subprocess_env_map_t& env) {
 
 void process::kill(int signal) const {
     if (::kill(child_pid_, signal) != 0) {
+    fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
         throw std::logic_error{"failed to kill child process"};
     }
 
     if (waitpid(child_pid_, nullptr, 0)) {
+    fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
         throw std::logic_error{"failed to wait for killed child"};
     }
 }
@@ -246,10 +253,12 @@ bool process::is_running() {
 
     if (result < 0) {
         // TODO: check errno == ECHILD
+        fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
         throw std::logic_error{"waitpid() failed: " + std::string(strerror(errno))};
     }
 
     // can only happen if waitpid() returns an unknown process ID
+    fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
     throw std::logic_error{"unknown error occured"};
 }
 
@@ -261,6 +270,7 @@ int process::check_waitpid_status_(int status) {
         return WEXITSTATUS(status);
     }
 
+fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
     throw std::logic_error{"unknown child process state"};
 }
 
@@ -269,6 +279,7 @@ void process::close_pipe_fd_(int fd) {
 
     if (rv != 0) {
         const auto error = errno;
+        fprintf(stderr, "About to throw std::logic_error at %s:%d\n", __FILE__, __LINE__);
         throw std::logic_error("failed to close pipe fd: " + std::string(strerror(error)));
     }
 }
