@@ -49,10 +49,17 @@ namespace linuxdeploy {
 
                 private:
                     int getApiLevelFromExecutable() {
-                        const auto arg =  "--plugin-api-version";
+                        std::string stdoutOutput;
 
-                        const subprocess::subprocess proc({pluginPath.string(), arg});
-                        const auto stdoutOutput = proc.check_output();
+                        try {
+                            const auto arg =  "--plugin-api-version";
+
+                            const subprocess::subprocess proc({pluginPath.string(), arg});
+                            stdoutOutput = proc.check_output();
+                        } catch (const std::exception &e) {
+                            ldLog() << LD_WARNING << pluginPath << ": " <<  e.what() << std::endl();
+                            return -1;
+                        }
 
                         if (stdoutOutput.empty()) {
                             ldLog() << LD_WARNING << "received empty response from plugin" << pluginPath << "while trying to fetch data for" <<  "--plugin-api-version" << std::endl;
